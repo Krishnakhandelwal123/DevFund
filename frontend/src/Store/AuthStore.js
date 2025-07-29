@@ -14,7 +14,7 @@ export const useAuthStore = create((set) => ({
       const res = await axiosInstance.get("/auth/check");
       set({ authUser: res.data });
     } catch (error) {
-      console.log("Error in checkAuth:", error);
+      console.error("Error in checkAuth:", error);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -27,7 +27,8 @@ export const useAuthStore = create((set) => ({
       toast.success("Logged out successfully");
       
     } catch (error) {
-      toast.error(error.response.data.message);
+      console.error("Logout error:", error);
+      toast.error(error.response?.data?.message || "Logout failed");
     }
   },
 
@@ -36,8 +37,10 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post("/auth/signup", data);
       set({ authUser: res.data });
+      toast.success("Account created successfully! Please check your email for verification.");
     } catch (error) {
-      toast.error(error.response.data.message);
+      console.error("Signup error:", error);
+      toast.error(error.response?.data?.message || "Signup failed");
     } finally {
       set({ isSigningUp: false });
     }
@@ -83,8 +86,14 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post("/auth/verifyemail", { code });
       toast.success(res.data.message || "Email verified successfully");
+      
+      // Refresh auth state after successful verification
+      const authRes = await axiosInstance.get("/auth/check");
+      set({ authUser: authRes.data });
+      
       return { success: true, message: res.data.message };
     } catch (error) {
+      console.error("Email verification error:", error);
       const message = error?.response?.data?.message || error?.message || "Verification failed";
       toast.error(message);
       return { success: false, message };
@@ -97,6 +106,7 @@ export const useAuthStore = create((set) => ({
       toast.success(res.data.message || "Password reset email sent");
       return { success: true, message: res.data.message };
     } catch (error) {
+      console.error("Forgot password error:", error);
       const message = error?.response?.data?.message || error?.message || "Failed to send reset email";
       toast.error(message);
       return { success: false, message };
@@ -109,6 +119,7 @@ export const useAuthStore = create((set) => ({
       toast.success(res.data.message || "Password reset successfully");
       return { success: true, message: res.data.message };
     } catch (error) {
+      console.error("Reset password error:", error);
       const message = error?.response?.data?.message || error?.message || "Failed to reset password";
       toast.error(message);
       return { success: false, message };

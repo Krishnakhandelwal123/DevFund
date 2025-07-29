@@ -14,7 +14,6 @@ const EmailVerification = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
-
     // Refs for the input fields to manage focus.
     const inputRefs = useRef([]);
 
@@ -22,39 +21,36 @@ const EmailVerification = () => {
     useEffect(() => {
         inputRefs.current[0]?.focus();
     }, []);
-    useEffect(()=>{
-           if(code.every(digit=>digit!=='')){
-            handleSubmit(new Event('submit'))
-           }
-    },[code]);
-  
+    
+    // Auto-submit when all 6 digits are filled
+    useEffect(() => {
+        if (code.every(digit => digit !== '') && !isLoading) {
+            handleSubmit(new Event('submit'));
+        }
+    }, [code, isLoading]);
 
     // Handles changes in any of the 6 input fields.
     const handleChange = (e, index) => {
         const { value } = e.target;
         const newCode = [...code];
          
-        if(value.length>1){
-            const pastedcode=value.slice(0,6).split("");
-            for(let i=0;i<6;i++){
-                newCode[i]=pastedcode[i] || "";
+        if(value.length > 1){
+            const pastedcode = value.slice(0,6).split("");
+            for(let i = 0; i < 6; i++){
+                newCode[i] = pastedcode[i] || "";
             }
-            setCode(newCode)
+            setCode(newCode);
              
-            const lastfilledindex=newCode.findLastIndex((digit)=>digit!=="")
-            const focusIndex=lastfilledindex<5?lastfilledindex+1:5;
-            inputRefs.current[focusIndex].focus();
-
-
-        } else{
+            const lastfilledindex = newCode.findLastIndex((digit) => digit !== "");
+            const focusIndex = lastfilledindex < 5 ? lastfilledindex + 1 : 5;
+            inputRefs.current[focusIndex]?.focus();
+        } else {
             newCode[index] = value;
             setCode(newCode);
-         if(value&&index<5){
-            inputRefs.current[index+1].focus();
-         }
+            if(value && index < 5){
+                inputRefs.current[index + 1]?.focus();
+            }
         }
-        
-
     };
 
     // Handles the 'Backspace' key to move focus backward.
@@ -76,12 +72,21 @@ const EmailVerification = () => {
 
         setIsLoading(true);
         setError("");
-        const result = await verifyEmail(verificationCode);
-        setIsLoading(false);
-        if (result.success) {
-            navigate("/");
-        } else {
-            setError(result.message);
+        
+        try {
+            const result = await verifyEmail(verificationCode);
+            if (result.success) {
+                // Small delay to ensure state is updated
+                setTimeout(() => {
+                    navigate("/");
+                }, 500);
+            } else {
+                setError(result.message);
+            }
+        } catch (error) {
+            setError("Verification failed. Please try again.");
+        } finally {
+            setIsLoading(false);
         }
     };
  
@@ -109,7 +114,7 @@ const EmailVerification = () => {
                     </h1>
                     <p className="mt-3 text-neutral-400">
                         We've sent a 6-digit verification code to <br />
-                        <span className="font-medium text-neutral-300">{authUser.email}</span>
+                        <span className="font-medium text-neutral-300">{authUser?.email}</span>
                     </p>
                 </div>
 
@@ -127,6 +132,7 @@ const EmailVerification = () => {
                                 // UPDATED: Input focus theme changed to blue
                                 className="h-14 w-12 sm:h-16 sm:w-14 rounded-lg border border-neutral-700 bg-neutral-800 text-center text-3xl font-semibold text-white transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 focus:outline-none"
                                 required
+                                disabled={isLoading}
                             />
                         ))}
                     </div>

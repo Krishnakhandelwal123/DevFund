@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { auth, provider } from "../lib/firebase.js";
 import { signInWithPopup } from "firebase/auth";
 import FloatingShape from '../components/FloatingShape.jsx';
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -26,9 +27,10 @@ const Login = () => {
         try {
             const result = await signInWithPopup(auth, provider);
             const idToken = await result.user.getIdToken();
-            googleLogin({ token: idToken });
+            await googleLogin({ token: idToken });
         } catch (error) {
             console.error("Google Sign-in error:", error);
+            toast.error("Google sign-in failed. Please try again.");
         }
     };
 
@@ -137,7 +139,7 @@ const Login = () => {
 
             {/* Right Section */}
             <div className="right w-[43%]  text-white flex items-center justify-center">
-                <img className='mr-40' src="../public/login.png" alt="" />
+                <img className='mr-40' src="/login.png" alt="Login illustration" />
             </div>
         </div>
     );

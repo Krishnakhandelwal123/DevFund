@@ -168,7 +168,7 @@ const Signup = () => {
 
             {/* Right Section */}
             <div className="right w-[43%]  text-white flex items-center justify-center">
-                <img className='mr-40' src="../public/login.png" alt="" />
+                <img className='mr-40' src="/login.png" alt="Signup illustration" />
             </div>
         </div>
     );

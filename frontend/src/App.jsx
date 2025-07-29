@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Signup from './pages/Signup'
 import Initial from './pages/Initial'
 import { useAuthStore } from "./Store/AuthStore";
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Loader } from "lucide-react";
 import EmailVerification from './pages/EmailVerification';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -37,18 +37,41 @@ const RedirectAuthenticatedUser = ({ children }) => {
   return children;
 };
 
+// Protect email verification route - only for authenticated but unverified users
+const EmailVerificationRoute = ({ children }) => {
+  const { authUser } = useAuthStore();
+
+  if (!authUser) {
+    return <Navigate to='/login' replace />;
+  }
+
+  if (authUser.isVerified) {
+    return <Navigate to='/' replace />;
+  }
+
+  return children;
+};
+
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
-  useEffect(() => {
+  
+  const stableCheckAuth = useCallback(() => {
     checkAuth();
   }, [checkAuth]);
+  
+  useEffect(() => {
+    stableCheckAuth();
+  }, [stableCheckAuth]);
 
-  if (isCheckingAuth && !authUser)
+  // Show loading only when checking auth and no user exists
+  if (isCheckingAuth && !authUser) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="size-10 animate-spin" />
       </div>
     );
+  }
+  
   return (
     <>
       <Routes>
@@ -61,7 +84,9 @@ const App = () => {
         <Route path='/signup' element={<RedirectAuthenticatedUser>
           <Signup />
         </RedirectAuthenticatedUser>} />
-        <Route path='/verifyemail' element={<EmailVerification />} />
+        <Route path='/verifyemail' element={<EmailVerificationRoute>
+          <EmailVerification />
+        </EmailVerificationRoute>} />
         <Route path='/forgotpassword' element={<RedirectAuthenticatedUser>
           <ForgotPasswordPage />
         </RedirectAuthenticatedUser>} />

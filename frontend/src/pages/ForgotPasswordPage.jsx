@@ -126,9 +126,4 @@ const ForgotPasswordPage = () => {
     );
 };
 
-// --- App Component to render the page ---
-export default function App() {
-    // In a real application, you would use React Router to display this component.
-    // For this example, we render it directly.
-    return <ForgotPasswordPage />;
-}
+export default ForgotPasswordPage;
