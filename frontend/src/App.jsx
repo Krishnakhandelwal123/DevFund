@@ -10,13 +10,14 @@ import { Loader } from "lucide-react";
 import EmailVerification from './pages/EmailVerification';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import Home from './pages/Home';
 
 
 const ProtectedRoute = ({ children }) => {
   const { authUser } = useAuthStore();
 
   if (!authUser) {
-    return <Navigate to='/login' replace />;
+    return <Navigate to='/' replace />;
   }
 
   if (!authUser.isVerified) {
@@ -31,7 +32,10 @@ const RedirectAuthenticatedUser = ({ children }) => {
   const { authUser } = useAuthStore();
 
   if (authUser && authUser.isVerified) {
-    return <Navigate to='/' replace />;
+    return <Navigate to='/s/home' replace />;
+  }
+  if (authUser && !authUser.isVerified) {
+    return <Navigate to='/verifyemail' replace />;
   }
 
   return children;
@@ -42,11 +46,11 @@ const EmailVerificationRoute = ({ children }) => {
   const { authUser } = useAuthStore();
 
   if (!authUser) {
-    return <Navigate to='/login' replace />;
+    return <Navigate to='/' replace />;
   }
 
   if (authUser.isVerified) {
-    return <Navigate to='/' replace />;
+    return <Navigate to='/s/home' replace />;
   }
 
   return children;
@@ -54,11 +58,11 @@ const EmailVerificationRoute = ({ children }) => {
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
-  
+
   const stableCheckAuth = useCallback(() => {
     checkAuth();
   }, [checkAuth]);
-  
+
   useEffect(() => {
     stableCheckAuth();
   }, [stableCheckAuth]);
@@ -71,12 +75,20 @@ const App = () => {
       </div>
     );
   }
-  
+
   return (
     <>
       <Routes>
-        <Route path='/' element={<ProtectedRoute>
-          <Initial />
+        <Route
+          path="/"
+          element={
+            !authUser || !authUser.isVerified
+              ? <Initial />
+              : <Navigate to="/s/home" replace />
+          }
+        />
+        <Route path='/s/home' element={<ProtectedRoute>
+          <Home />
         </ProtectedRoute>} />
         <Route path='/login' element={<RedirectAuthenticatedUser>
           <Login />
@@ -91,15 +103,15 @@ const App = () => {
           <ForgotPasswordPage />
         </RedirectAuthenticatedUser>} />
         <Route
-					path='/resetpassword/:token'
-					element={
-						<RedirectAuthenticatedUser>
-							<ResetPasswordPage />
-						</RedirectAuthenticatedUser>
-					}
-				/>
-				{/* catch all routes */}
-				<Route path='*' element={<Navigate to='/' replace />} />
+          path='/resetpassword/:token'
+          element={
+            <RedirectAuthenticatedUser>
+              <ResetPasswordPage />
+            </RedirectAuthenticatedUser>
+          }
+        />
+        {/* catch all routes */}
+        <Route path='*' element={<Navigate to='/s/home' replace />} />
       </Routes>
       <Toaster />
     </>
