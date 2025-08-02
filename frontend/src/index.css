@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+.grid-background {
+    
+    background-image: 
+      linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+    background-size: 4rem 4rem; /* This controls the spacing of the grid. 4rem = 64px */
+  }
+
+
+body, a, button {
+  cursor: none;
+}

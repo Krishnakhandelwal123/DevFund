@@ -11,6 +11,7 @@ import EmailVerification from './pages/EmailVerification';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import Home from './pages/Home';
+import CustomCursor from './components/CustomCursor';
 
 
 const ProtectedRoute = ({ children }) => {
@@ -34,8 +35,8 @@ const RedirectAuthenticatedUser = ({ children }) => {
   if (authUser && authUser.isVerified) {
     return <Navigate to='/s/home' replace />;
   }
-  if (authUser && !authUser.isVerified) {
-    return <Navigate to='/verifyemail' replace />;
+  if (authUser && authUser.isVerified) {
+    return <Navigate to='/s/home' replace />;
   }
 
   return children;
@@ -78,6 +79,7 @@ const App = () => {
 
   return (
     <>
+      <CustomCursor />
       <Routes>
         <Route
           path="/"
@@ -88,6 +90,15 @@ const App = () => {
           }
         />
         <Route path='/s/home' element={<ProtectedRoute>
+          <Home />
+        </ProtectedRoute>} />
+        <Route path='/s/explore' element={<ProtectedRoute>
+          <Home />
+        </ProtectedRoute>} />
+        <Route path='/s/notifications' element={<ProtectedRoute>
+          <Home />
+        </ProtectedRoute>} />
+        <Route path='/s/settings' element={<ProtectedRoute>
           <Home />
         </ProtectedRoute>} />
         <Route path='/login' element={<RedirectAuthenticatedUser>
@@ -111,6 +122,7 @@ const App = () => {
           }
         />
         {/* catch all routes */}
+        <Route path='/s' element={<Navigate to='/s/home' replace />} />
         <Route path='*' element={<Navigate to='/s/home' replace />} />
       </Routes>
       <Toaster />
